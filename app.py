@@ -1,8 +1,9 @@
 import math
+import os
 
 from flask import Flask, jsonify, request
-from waitress import serve
 from flask_cors import CORS
+
 app = Flask(__name__)
 CORS(app)
 
@@ -17,15 +18,15 @@ def encrypt():
         while pointer < len(message):
             cipherText[col] += message[pointer]
             pointer += key
-    encrypted_text= "".join(cipherText)
-    return jsonify({"ans": encrypted_text,"key":key})
+    encrypted_text = "".join(cipherText)
+    return jsonify({"ans": encrypted_text, "key": key})
 
 
 @app.route('/decrypt', methods=['POST'])
 def decrypt():
     data = request.get_json(force=True)
-    message= data["message"]
-    key =data["key"]
+    message = data["message"]
+    key = data["key"]
     numCols = math.ceil(len(message) / key)
     numRows = key
     numShadedBoxes = (numCols * numRows) - len(message)
@@ -38,20 +39,21 @@ def decrypt():
         col += 1
 
         if (
-                (col == numCols)
-                or (col == numCols - 1)
-                and (row >= numRows - numShadedBoxes)
+            (col == numCols)
+            or (col == numCols - 1)
+            and (row >= numRows - numShadedBoxes)
         ):
             col = 0
             row += 1
 
-    ans="".join(plainText)
+    ans = "".join(plainText)
     return jsonify({"ans": ans})
 
 
-
 if __name__ == '__main__':
-    serve(app,host='0.0.0.0', port=3300)
+    port = int(os.environ.get("PORT", 3300))
+    app.run(host='0.0.0.0', port=port)
+
 
 
 
